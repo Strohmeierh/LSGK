@@ -784,6 +784,9 @@
     <div class="sunrise-bar" id="sunrise-bar"></div>
   </header>
 
+  <!-- Gewitter-Hinweisbanner (Modellindikator Open-Meteo, kein Ersatz für offizielle Warnungen) -->
+  <div id="storm-banner" style="display:none;max-width:1600px;margin:0 auto 16px;padding:10px 14px;border-radius:8px;border:1px solid;font-size:0.85rem;text-align:center;line-height:1.4;"></div>
+
   <!-- ===== WETTER-PANEL ===== -->
   <div class="wx-panel" id="wx-panel">
     <div class="wx-card">
@@ -1351,9 +1354,9 @@
 
     setInterval(function() {
       if(document.hidden) return;
+      loadOpenMeteo(); // hält auch das Gewitter-Banner aktuell (15-min-Throttle intern)
       if(document.getElementById('wx-panel').classList.contains('open')) {
         loadWetter();
-        loadOpenMeteo();
       }
     }, 600000);
 
@@ -1375,6 +1378,27 @@
       'slf-LAU1':         'Lauenehore'
     };
 
+    // Letzten gefüllten QNH aus einer SMN-now-CSV (Zeilen können lückenhaft sein)
+    function lastQnh(txt) {
+      var lines = txt.trim().split(/\r?\n/);
+      if (lines.length < 2) return null;
+      var idx = lines[0].split(';').indexOf('pp0qnhs0');
+      if (idx === -1) return null;
+      for (var i = lines.length - 1; i >= 1; i--) {
+        var c = lines[i].split(';');
+        var v = c[idx] ? parseFloat(c[idx]) : NaN;
+        if (!isNaN(v) && v > 900 && v < 1100) return v;
+      }
+      return null;
+    }
+
+    function fetchQnh(st) {
+      return fetch('https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/' + st + '/ogd-smn_' + st + '_t_now.csv?t=' + Date.now(), { cache: 'no-store' })
+        .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(lastQnh)
+        .catch(function() { return null; });
+    }
+
     function loadWetter() {
       var el = document.getElementById('wx-content');
       el.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:10px 0;">Lade Wetterdaten…</div>';
@@ -1388,8 +1412,12 @@
         .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .catch(function() { return null; });
 
-      Promise.all([pStation, pBerg]).then(function(res) {
-        renderAll(el, res[0], res[1]);
+      // Föhn-Index: QNH-Differenz Sion (Süd) − Boltigen (Nord)
+      var pSio = fetchQnh('sio');
+      var pBol = fetchQnh('bol');
+
+      Promise.all([pStation, pBerg, pSio, pBol]).then(function(res) {
+        renderAll(el, res[0], res[1], { sio: res[2], bol: res[3] });
       });
     }
 
@@ -1454,7 +1482,7 @@
       return { zeit: zeit, ageMin: (Date.now() - dUtc.getTime()) / 60000 };
     }
 
-    function renderAll(el, d, berg) {
+    function renderAll(el, d, berg, foehn) {
       // ─── Stationsdaten (MeteoSchweiz CHD) ──────────────
       var t = parseSmnTime(d && d.time);
       var stationZeit   = t.zeit;
@@ -1554,6 +1582,34 @@
           '<div class="wx-stat-sub" style="white-space: nowrap;">' + Math.round(densAlt / 3.28084) + '&nbsp;m</div></div>';
       }
 
+      // Wolkenbasis-Schätzung (Faustformel: Spread × 122 m über Station).
+      // Nur bei Konvektion aussagekräftig – als grobe Cu-Basis gedacht.
+      var cbHtml = '';
+      if (temp !== null && dewp !== null) {
+        var baseMsl = Math.round((1028 + (temp - dewp) * 122) / 50) * 50;
+        var baseFt  = Math.round(baseMsl * 3.28084 / 100) * 100;
+        var uebPlatz = baseMsl - 1008;
+        cbHtml = '<div class="wx-stat"><div class="wx-stat-label">Wolkenbasis (Schätzung)</div>' +
+          '<div class="wx-stat-value" style="white-space:nowrap;">' + baseMsl + '&nbsp;m</div>' +
+          '<div class="wx-stat-sub" style="white-space:nowrap;">' + baseFt + '&nbsp;ft (MSL)<br>' +
+          '<span title="über Platzhöhe Saanen (1008 m)">≈&nbsp;' + uebPlatz + '&nbsp;m über Platz</span></div></div>';
+      }
+
+      // Föhn-Index: QNH Sion − QNH Boltigen (Süd−Nord über die Berner Alpen)
+      var foehnHtml = '';
+      if (foehn && foehn.sio !== null && foehn.bol !== null) {
+        var dp  = foehn.sio - foehn.bol;
+        var adp = Math.abs(dp);
+        var fCol, fTxt;
+        if (adp < 2)      { fCol = '#10b981'; fTxt = 'unauffällig'; }
+        else if (adp < 4) { fCol = '#f59e0b'; fTxt = dp > 0 ? 'Südföhn-Tendenz' : 'Nord-/Bise-Tendenz'; }
+        else              { fCol = '#ef4444'; fTxt = dp > 0 ? 'Südföhn wahrscheinlich' : 'Nordstau / kräftige Bise'; }
+        var sign = dp > 0 ? '+' : '';
+        foehnHtml = '<div class="wx-stat"><div class="wx-stat-label">Föhn-Index</div>' +
+          '<div class="wx-stat-value" style="color:' + fCol + ';white-space:nowrap;">' + sign + dp.toFixed(1).replace('.', ',') + '&nbsp;hPa</div>' +
+          '<div class="wx-stat-sub" style="white-space:nowrap;">Sion − Boltigen<br>' + fTxt + '</div></div>';
+      }
+
       // Pisten-Diagramm (RWY 08/26) – nur bei vorhandenen Winddaten
       var bearing = wdir !== null ? Math.round(wdir) : 0;
       var diagWspd = (wspdKt !== null ? wspdKt : 0) * 1.852; // km/h
@@ -1633,7 +1689,8 @@
         '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;line-height:1.4;">' +
         'Talwerte: MeteoSchweiz Château-d\'Oex (1028&nbsp;m) – nächstgelegene offizielle Station, ' +
         'gleiches Tal der Saane, rund 8&nbsp;km talabwärts. Bergwind: <a href="https://winds.mobi/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">winds.mobi</a> ' +
-        '(Rellerli nur 2,5&nbsp;km vom Platz). Alle Angaben zur groben Orientierung.' +
+        '(Rellerli nur 2,5&nbsp;km vom Platz). Wolkenbasis = Faustformel Spread&nbsp;×&nbsp;122&nbsp;m, nur bei Thermik/Konvektion aussagekräftig. ' +
+        'Föhn-Index = QNH-Differenz Sion−Boltigen. Alle Angaben zur groben Orientierung.' +
         '</div>';
 
       // ─── Finale Ausgabe ───
@@ -1649,6 +1706,8 @@
             stat('QNH', qnhVal, qnhSub) +
             regenrateHtml +
             daHtml +
+            cbHtml +
+            foehnHtml +
           '</div>' +
         '</div>' +
         bergHtml +
@@ -1873,7 +1932,7 @@
     var OM_URL = 'https://api.open-meteo.com/v1/forecast' +
       '?latitude=46.4875&longitude=7.25083' +
       '&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation_probability,precipitation,cloud_cover' +
-      ',wind_speed_850hPa,wind_direction_850hPa,wind_speed_700hPa,wind_direction_700hPa,freezing_level_height,cape' +
+      ',wind_speed_850hPa,wind_direction_850hPa,wind_speed_700hPa,wind_direction_700hPa,freezing_level_height,cape,weather_code' +
       '&forecast_hours=12&wind_speed_unit=kn&timezone=Europe%2FZurich';
     var omLastLoad = 0;
 
@@ -1893,6 +1952,37 @@
       var el   = document.getElementById('om-content');
       if (!card || !el || !d || !d.hourly || !d.hourly.time || !d.hourly.time.length) return;
       var h = d.hourly;
+
+      // ⚡ Gewitter-Hinweisbanner: Modellindikator aus CAPE + Gewitter-Wettercode
+      // (95/96/99). Kein Ersatz für offizielle Warnungen – die sind (Stand 2026)
+      // nicht CORS-offen abrufbar; Banner verlinkt auf MeteoSchweiz.
+      var banner = document.getElementById('storm-banner');
+      if (banner) {
+        var maxCape = 0, firstTrig = null, hasTs = false;
+        for (var j = 0; j < h.time.length; j++) {
+          var cj = h.cape ? h.cape[j] : null;
+          var wc = h.weather_code ? h.weather_code[j] : null;
+          if (cj !== null && cj > maxCape) maxCape = cj;
+          if (wc !== null && wc >= 95) hasTs = true;
+          if (firstTrig === null && ((cj !== null && cj >= 800) || (wc !== null && wc >= 95))) {
+            firstTrig = h.time[j].slice(11, 16);
+          }
+        }
+        if (hasTs || maxCape >= 800) {
+          var rot = hasTs || maxCape >= 1500;
+          banner.style.background  = rot ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.12)';
+          banner.style.borderColor = rot ? '#ef4444' : '#f59e0b';
+          banner.style.color       = rot ? '#f87171' : '#fbbf24';
+          banner.innerHTML = '⚡ <strong>Gewitterpotenzial (Modell)</strong>: ' +
+            (hasTs ? 'Gewitter in der 12-h-Vorhersage' : 'CAPE bis ' + Math.round(maxCape) + '&nbsp;J/kg') +
+            (firstTrig ? ' ab ca. ' + firstTrig : '') +
+            ' &nbsp;·&nbsp; <a href="https://www.meteoschweiz.admin.ch/lokalprognose/saanen/3792.html" target="_blank" rel="noopener" style="color:inherit;font-weight:600;">Offizielle Warnungen: MeteoSchweiz ↗</a>';
+          banner.style.display = '';
+        } else {
+          banner.style.display = 'none';
+        }
+      }
+
       var rows = { time: '', wind: '', gust: '', w15: '', w30: '', rain: '', cloud: '', frz: '', cape: '' };
 
       function windCell(spd, dir, warnAb) {
@@ -2508,6 +2598,9 @@
     /* ── Panel-Zustand vom letzten Besuch wiederherstellen ──── */
     if (storeGet('lsgk-wx-open') === '1') toggleWx();
     if (storeGet('lsgk-radar-open') === '1') toggleRadar();
+
+    // Gewitter-Banner braucht die Open-Meteo-Daten auch bei geschlossenem Panel
+    loadOpenMeteo();
 
   })();
 
