@@ -769,10 +769,13 @@
         <div class="dropdown-content" id="tools-menu">
           <a href="#" data-flights-icao="LSGK" target="_blank" rel="noopener">🧭 Fluganalyse LSGK</a>
           <a href="https://ktrax.kisstech.ch/logbook?id=LSGK" target="_blank" rel="noopener">📋 Logbuch LSGK (KTrax)</a>
+          <a href="https://www.weglide.org/airport/161517" target="_blank" rel="noopener">🛩 WeGlide – Flugplatz LSGK</a>
           <a href="https://glideandseek.com/?viewport=46.4875,7.25083,12" target="_blank" rel="noopener">🛰 Glide and Seek</a>
+          <a href="https://soaringmeteo.org/" target="_blank" rel="noopener">⛅ SoaringMeteo (Thermik Alpen)</a>
           <a href="https://www.skybriefing.com/de/dabs" target="_blank" rel="noopener">🗺 DABS (Schweiz)</a>
           <a href="https://notaminfo.com/switzerlandmap" target="_blank" rel="noopener">✈ NOTAM Info (Schweiz)</a>
           <a href="https://metar-taf.com/de/LSGK" target="_blank" rel="noopener">📄 METAR/TAF Region</a>
+          <a href="https://www.segelflug-saanen.ch/" target="_blank" rel="noopener">⛰ Segelfluglager Saanen</a>
           <a href="https://www.gstaad-airport.ch/" target="_blank" rel="noopener">🏠 Gstaad Airport</a>
           <a href="https://vereinsflieger.de/" target="_blank" rel="noopener">☁ Vereinsflieger</a>
         </div>
@@ -1864,10 +1867,13 @@
       return { rise: jdToTime(Jrise), set: jdToTime(Jset) };
     }
 
-    /* ── Open-Meteo: Trend nächste 12 h ─────────────────────── */
+    /* ── Open-Meteo: Trend nächste 12 h (inkl. Segelflug-Höhendaten) ──
+       850 hPa ≈ 1500 m, 700 hPa ≈ 3000 m; dazu Nullgradgrenze und CAPE
+       (Gewitter-/Überentwicklungsindikator).                            */
     var OM_URL = 'https://api.open-meteo.com/v1/forecast' +
       '?latitude=46.4875&longitude=7.25083' +
       '&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation_probability,precipitation,cloud_cover' +
+      ',wind_speed_850hPa,wind_direction_850hPa,wind_speed_700hPa,wind_direction_700hPa,freezing_level_height,cape' +
       '&forecast_hours=12&wind_speed_unit=kn&timezone=Europe%2FZurich';
     var omLastLoad = 0;
 
@@ -1887,23 +1893,39 @@
       var el   = document.getElementById('om-content');
       if (!card || !el || !d || !d.hourly || !d.hourly.time || !d.hourly.time.length) return;
       var h = d.hourly;
-      var rows = { time: '', wind: '', gust: '', rain: '', cloud: '' };
+      var rows = { time: '', wind: '', gust: '', w15: '', w30: '', rain: '', cloud: '', frz: '', cape: '' };
+
+      function windCell(spd, dir, warnAb) {
+        var arrow = (dir !== null && dir !== undefined)
+          ? '<span class="om-arrow" style="transform:rotate(' + ((dir + 180) % 360) + 'deg)">↑</span> '
+          : '';
+        return '<td' + (spd !== null && spd >= warnAb ? ' class="om-warn"' : '') + '>' +
+          arrow + (spd !== null ? Math.round(spd) : '–') + '</td>';
+      }
+
       for (var i = 0; i < h.time.length; i++) {
-        var ws = h.wind_speed_10m            ? h.wind_speed_10m[i]            : null;
-        var wg = h.wind_gusts_10m            ? h.wind_gusts_10m[i]            : null;
-        var wd = h.wind_direction_10m        ? h.wind_direction_10m[i]        : null;
-        var pp = h.precipitation_probability ? h.precipitation_probability[i] : null;
-        var pr = h.precipitation             ? h.precipitation[i]             : null;
-        var cc = h.cloud_cover               ? h.cloud_cover[i]               : null;
+        var ws  = h.wind_speed_10m            ? h.wind_speed_10m[i]            : null;
+        var wg  = h.wind_gusts_10m            ? h.wind_gusts_10m[i]            : null;
+        var wd  = h.wind_direction_10m        ? h.wind_direction_10m[i]        : null;
+        var s85 = h.wind_speed_850hPa         ? h.wind_speed_850hPa[i]         : null;
+        var d85 = h.wind_direction_850hPa     ? h.wind_direction_850hPa[i]     : null;
+        var s70 = h.wind_speed_700hPa         ? h.wind_speed_700hPa[i]         : null;
+        var d70 = h.wind_direction_700hPa     ? h.wind_direction_700hPa[i]     : null;
+        var fz  = h.freezing_level_height     ? h.freezing_level_height[i]     : null;
+        var cp  = h.cape                      ? h.cape[i]                      : null;
+        var pp  = h.precipitation_probability ? h.precipitation_probability[i] : null;
+        var pr  = h.precipitation             ? h.precipitation[i]             : null;
+        var cc  = h.cloud_cover               ? h.cloud_cover[i]               : null;
 
         rows.time += '<td>' + h.time[i].slice(11, 16) + '</td>';
-        var arrow = (wd !== null && wd !== undefined)
-          ? '<span class="om-arrow" style="transform:rotate(' + ((wd + 180) % 360) + 'deg)">↑</span> '
-          : '';
-        rows.wind += '<td' + (ws !== null && ws >= 15 ? ' class="om-warn"' : '') + '>' +
-          arrow + (ws !== null ? Math.round(ws) : '–') + '</td>';
+        rows.wind += windCell(ws, wd, 15);
         rows.gust += '<td' + (wg !== null && wg >= 15 ? ' class="om-warn"' : '') + '>' +
           (wg !== null ? Math.round(wg) : '–') + '</td>';
+        rows.w15  += windCell(s85, d85, 20);
+        rows.w30  += windCell(s70, d70, 25);
+        rows.frz  += '<td>' + (fz !== null ? (Math.round(fz / 100) * 100 / 1000).toFixed(1).replace('.', ',') : '–') + '</td>';
+        rows.cape += '<td' + (cp !== null && cp >= 1000 ? ' class="om-warn"' : (cp !== null && cp >= 500 ? ' style="color:#f59e0b;"' : '')) + '>' +
+          (cp !== null ? Math.round(cp) : '–') + '</td>';
         var mmTitle = (pr !== null && pr > 0) ? ' title="' + pr + ' mm"' : '';
         rows.rain += '<td' + (pp !== null && pp >= 50 ? ' class="om-wet"' : '') + mmTitle + '>' +
           (pp !== null ? pp + '%' : '–') + '</td>';
@@ -1912,14 +1934,18 @@
       el.innerHTML =
         '<div style="overflow-x:auto;">' +
           '<table class="om-table">' +
-            '<tr><th>Zeit</th>'    + rows.time  + '</tr>' +
-            '<tr><th>Wind kt</th>' + rows.wind  + '</tr>' +
-            '<tr><th>Böen kt</th>' + rows.gust  + '</tr>' +
-            '<tr><th>Regen</th>'   + rows.rain  + '</tr>' +
-            '<tr><th>Wolken</th>'  + rows.cloud + '</tr>' +
+            '<tr><th>Zeit</th>'        + rows.time  + '</tr>' +
+            '<tr><th>Wind kt</th>'     + rows.wind  + '</tr>' +
+            '<tr><th>Böen kt</th>'     + rows.gust  + '</tr>' +
+            '<tr><th title="Wind auf 850 hPa">Wind 1500&nbsp;m</th>' + rows.w15 + '</tr>' +
+            '<tr><th title="Wind auf 700 hPa">Wind 3000&nbsp;m</th>' + rows.w30 + '</tr>' +
+            '<tr><th title="Nullgradgrenze">0°-Grenze km</th>'       + rows.frz + '</tr>' +
+            '<tr><th title="Gewitter-/Überentwicklungsindikator: ab ~500 J/kg beachten, ab ~1000 kritisch">CAPE J/kg</th>' + rows.cape + '</tr>' +
+            '<tr><th>Regen</th>'       + rows.rain  + '</tr>' +
+            '<tr><th>Wolken</th>'      + rows.cloud + '</tr>' +
           '</table>' +
         '</div>' +
-        '<div class="wx-updated">Vorhersage: <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">Open-Meteo</a></div>';
+        '<div class="wx-updated">Vorhersage: <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">Open-Meteo</a> · Höhenwinde: 850/700&nbsp;hPa</div>';
       card.style.display = '';
     }
 
