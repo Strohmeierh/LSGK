@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Live-Webcam-Übersicht für LSGK Flugplatz Saanen / Gstaad">
-  <title>Huberts LSGK Dashboard</title>
+  <title>LSGK Dashboard</title>
 
   <link rel="apple-touch-icon" href="icon-lsgk.png">
   <link rel="apple-touch-icon-precomposed" href="icon-lsgk.png">
@@ -737,7 +737,7 @@
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
         <circle cx="12" cy="13" r="4"/>
       </svg>
-      Huberts LSGK Dashboard
+      LSGK Dashboard
     </h1>
 
     <div class="header-links">
@@ -766,7 +766,7 @@
           Links ▼
         </button>
         <div class="dropdown-content" id="tools-menu">
-          <a href="#" data-flights-icao="LSGK" target="_blank" rel="noopener">🧭 Fluganalyse LSGK</a>
+          <a href="https://ktrax.kisstech.ch/logbook?id=LSGK" target="_blank" rel="noopener">🧭 Fluganalyse LSGK (KTrax)</a>
           <a href="https://glideandseek.com/?viewport=46.4875,7.25083,12" target="_blank" rel="noopener">🛰 Glide and Seek</a>
           <a href="https://www.skybriefing.com/de/dabs" target="_blank" rel="noopener">🗺 DABS (Schweiz)</a>
           <a href="https://notaminfo.com/switzerlandmap" target="_blank" rel="noopener">✈ NOTAM Info (Schweiz)</a>
@@ -847,25 +847,14 @@
     <h2 class="section-title">Flugplatz Saanen / Gstaad</h2>
     <div class="cam-grid">
 
-      <!-- Flugplatz-Panorama (Piste + Berge) -->
+      <!-- Flugplatz-Panorama (Piste + Berge), roundshot-Standbild -->
       <div class="cam-card">
         <div class="cam-header">
-          <a href="https://www.windy.com/webcams/1697040021" target="_blank" rel="noopener">Flugplatz – Panorama Piste</a>
-          <span class="status-dot"></span>
-        </div>
-        <div class="media-container">
-          <img class="live-cam" data-src="https://wsrv.nl/?url=images-webcams.windy.com/21/1697040021/current/original/1697040021.jpg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="640" height="360" alt="Flugplatz Saanen Panorama">
-        </div>
-      </div>
-
-      <!-- Flugplatz Roundshot-Panorama (Standbild, kein Cookie-Banner) -->
-      <div class="cam-card">
-        <div class="cam-header">
-          <a href="https://gstaad-airport.roundshot.com/" target="_blank" rel="noopener">Flugplatz – Roundshot Panorama</a>
+          <a href="https://gstaad-airport.roundshot.com/" target="_blank" rel="noopener">Flugplatz Saanen – Panorama</a>
           <span class="status-dot age-unknown" title="Bildzeit siehe Roundshot-Seite"></span>
         </div>
         <div class="media-container">
-          <img class="live-cam" data-src="https://wsrv.nl/?url=gstaad-airport.roundshot.com/cams/671/medium" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="640" height="360" alt="Flugplatz Saanen Roundshot Panorama">
+          <img class="live-cam" data-src="https://wsrv.nl/?url=gstaad-airport.roundshot.com/cams/671/medium" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="640" height="360" alt="Flugplatz Saanen Panorama">
         </div>
       </div>
 
@@ -927,6 +916,39 @@
         </div>
         <div class="media-container">
           <img class="live-cam" data-src="https://wsrv.nl/?url=www.sparenmoos-aktiv.ch/webcam/snapshot.jpg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="640" height="360" alt="Sparenmoos Alpweide">
+        </div>
+      </div>
+
+      <!-- Lauenen (Hotel Alpenland): Talpanorama Lauenental, roundshot-Standbild -->
+      <div class="cam-card">
+        <div class="cam-header">
+          <a href="https://alpenland-lauenen.roundshot.com/" target="_blank" rel="noopener">Lauenen – Talpanorama</a>
+          <span class="status-dot age-unknown" title="Bildzeit siehe Roundshot-Seite"></span>
+        </div>
+        <div class="media-container">
+          <img class="live-cam" data-src="https://wsrv.nl/?url=alpenland-lauenen.roundshot.com/cams/1612/medium" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="640" height="360" alt="Lauenen Talpanorama">
+        </div>
+      </div>
+
+      <!-- Maison Hornberg (Saanenmöser/Schönried): Weitblick, roundshot-Standbild -->
+      <div class="cam-card">
+        <div class="cam-header">
+          <a href="https://maisonhornberg.roundshot.com/" target="_blank" rel="noopener">Hornberg – Saanenmöser</a>
+          <span class="status-dot age-unknown" title="Bildzeit siehe Roundshot-Seite"></span>
+        </div>
+        <div class="media-container">
+          <img class="live-cam" data-src="https://wsrv.nl/?url=maisonhornberg.roundshot.com/cams/840/medium" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="640" height="360" alt="Hornberg Saanenmöser">
+        </div>
+      </div>
+
+      <!-- Gstaad Palace: Blick über Gstaad, roundshot-Standbild -->
+      <div class="cam-card">
+        <div class="cam-header">
+          <a href="https://palacegstaad.roundshot.com/" target="_blank" rel="noopener">Gstaad – Palace</a>
+          <span class="status-dot age-unknown" title="Bildzeit siehe Roundshot-Seite"></span>
+        </div>
+        <div class="media-container">
+          <img class="live-cam" data-src="https://wsrv.nl/?url=palacegstaad.roundshot.com/cams/1708/medium" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="640" height="360" alt="Gstaad Palace">
         </div>
       </div>
 
@@ -1107,22 +1129,31 @@
       container.classList.remove('loaded');
       img.classList.remove('loaded');
 
-      var fresh = new Image();
-      fresh.onload = function() {
-        img.src = fresh.src;
-        img.style.objectFit = '';
-        img.classList.add('loaded');
-        container.classList.add('loaded');
-        var e = camStatus[base];
-        img.dataset.loadedChange = (e && e.lastChange) ? String(e.lastChange) : '';
-      };
-      fresh.onerror = function() {
-        img.src = fallbackSvg;
-        img.style.objectFit = 'contain';
-        img.classList.add('loaded');
-        container.classList.add('loaded');
-      };
-      fresh.src = bust(displayUrl(base), ts);
+      // Grosse/langsame Origins (z.B. Sparenmoos ~1 MB) fallen über den
+      // wsrv-Proxy gelegentlich einmalig aus → 1 Wiederholung, bevor der
+      // Platzhalter erscheint.
+      var attempts = 0;
+      function attempt() {
+        var fresh = new Image();
+        fresh.onload = function() {
+          img.src = fresh.src;
+          img.style.objectFit = '';
+          img.classList.add('loaded');
+          container.classList.add('loaded');
+          var e = camStatus[base];
+          img.dataset.loadedChange = (e && e.lastChange) ? String(e.lastChange) : '';
+        };
+        fresh.onerror = function() {
+          attempts++;
+          if (attempts < 2) { setTimeout(attempt, 2500); return; }
+          img.src = fallbackSvg;
+          img.style.objectFit = 'contain';
+          img.classList.add('loaded');
+          container.classList.add('loaded');
+        };
+        fresh.src = bust(displayUrl(base), Date.now());
+      }
+      attempt();
 
       applyStatusToCam(img);
     }
@@ -2396,293 +2427,6 @@
 
   })();
 
-  // ===== OGN Fluganalyse → SeeYou Cloud Viewer (eigenständige Seite via Blob-URL) =====
-  (function () {
-    function buildFlightsHtml(icao) {
-      var icaoJs = JSON.stringify(icao);
-      return `<!DOCTYPE html>
-<html lang="de"><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>OGN Fluganalyse ${icao}</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧭%3C/text%3E%3C/svg%3E">
-<style>
-:root{--bg:#0f172a;--bg-card:#1e293b;--text:#e2e8f0;--text-muted:#94a3b8;--accent:#38bdf8;--accent-dim:rgba(56,189,248,0.15);--card-border:#334155;--warn:#fbbf24}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.45;min-height:100vh;-webkit-text-size-adjust:100%}
-header{padding:14px 18px;padding-top:max(14px,env(safe-area-inset-top));border-bottom:1px solid var(--card-border);background:var(--bg-card)}
-.header-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;width:100%}
-h1{margin:0;font-size:1rem;letter-spacing:0.02em;font-weight:600}
-h1 .accent{color:var(--accent)}
-.meta{color:var(--text-muted);font-size:0.78rem}
-.meta b{color:var(--text);font-weight:600}
-.title-wrap{display:flex;align-items:center;gap:10px}
-.title-link{color:inherit;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-style:dotted;text-decoration-thickness:1px;text-underline-offset:4px;cursor:pointer}
-.title-link:hover{text-decoration-style:solid;text-decoration-thickness:2px}
-.title-link::after{content:" ↗";color:var(--accent);font-size:0.75em;font-weight:400;margin-left:2px;display:inline-block;vertical-align:baseline;text-decoration:none}
-.refresh-btn{background:var(--bg);border:1px solid var(--card-border);color:var(--text);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:1.05rem;line-height:1;padding:0;display:inline-flex;align-items:center;justify-content:center;transition:background-color 0.15s,border-color 0.15s,color 0.15s;font-family:inherit;flex-shrink:0}
-.refresh-btn:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
-.refresh-btn.spinning{color:var(--accent);animation:spin 0.7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.tow-partner{display:inline-block;background:var(--accent-dim);color:var(--accent);padding:1px 6px;border-radius:4px;font-size:0.74rem;font-weight:600;font-variant-numeric:tabular-nums;margin-left:5px;white-space:nowrap}
-.date-nav{display:flex;align-items:center;gap:8px;margin-top:10px}
-.navbtn,.date-display{background:var(--bg);border:1px solid var(--card-border);color:var(--text);padding:8px 14px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.85rem;font-variant-numeric:tabular-nums;transition:background-color 0.15s,border-color 0.15s,color 0.15s}
-.navbtn{width:40px;padding:8px 0;font-size:1.1rem;flex-shrink:0;line-height:1}
-.navbtn:hover:not(:disabled),.date-display:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
-.navbtn:disabled{opacity:0.3;cursor:default}
-.date-display{min-width:220px;font-weight:600;text-align:center;flex:1}
-.search-bar{position:relative;margin-top:8px;width:100%}
-.search-input{width:100%;background:var(--bg);border:1px solid var(--card-border);color:var(--text);padding:8px 36px 8px 34px;border-radius:6px;font-family:inherit;font-size:0.85rem;transition:border-color 0.15s,background-color 0.15s;outline:none;-webkit-appearance:none;appearance:none}
-.search-input:focus{border-color:var(--accent);background:var(--accent-dim)}
-.search-input::placeholder{color:var(--text-muted)}
-.search-input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
-.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none;line-height:1}
-.search-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--text-muted);cursor:pointer;padding:4px 8px;font-size:1.1rem;border-radius:4px;line-height:1;display:none;font-family:inherit}
-.search-clear.visible{display:block}
-.search-clear:hover{color:var(--accent);background:var(--accent-dim)}
-.meta .count{color:var(--accent);font-weight:600}
-tfoot tr.sum-row td{background:var(--accent-dim);border-top:2px solid var(--accent);padding:12px 14px}
-.cell-sum{display:flex;gap:6px 20px;align-items:baseline;flex-wrap:wrap;color:var(--text)}
-.sum-label{color:var(--accent);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:700}
-.sum-item{font-size:0.92rem;font-weight:600;font-variant-numeric:tabular-nums}
-.sum-item .lbl{color:var(--text-muted);font-weight:500;font-size:0.78rem;margin-right:5px}
-.sum-running{color:var(--text-muted);font-weight:500;font-size:0.78rem;font-style:italic;font-variant-numeric:tabular-nums}
-main{padding:14px 18px 24px;max-width:1100px;margin:0 auto}
-.status{color:var(--text-muted);font-size:0.9rem;padding:14px 0;font-style:italic;text-align:center}
-.hint{color:var(--text-muted);font-size:0.74rem;margin-top:10px;line-height:1.55}
-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-thead th{text-align:left;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--card-border)}
-thead th.num{text-align:right}
-tbody tr{border-bottom:1px solid var(--card-border);transition:background-color 0.15s}
-tbody tr:hover{background:var(--accent-dim)}
-tbody td{padding:9px 10px;font-size:0.85rem;vertical-align:middle}
-.cell-reg{font-weight:600;color:var(--text);white-space:nowrap}
-.cell-reg .comp{color:var(--text-muted);font-size:0.78rem;font-weight:400;margin-left:4px}
-.cell-ac{color:var(--text-muted);font-size:0.82rem}
-.num{text-align:right;color:var(--text)}
-.num-muted{text-align:right;color:var(--text-muted)}
-.running{color:var(--warn);font-style:italic}
-.warn-icon{color:var(--warn);margin-left:4px}
-.priv{color:var(--text-muted);font-style:italic}
-.btn-igc{display:inline-block;background:var(--accent);color:var(--bg);padding:7px 14px;border-radius:5px;text-decoration:none;font-size:0.82rem;font-weight:600;white-space:nowrap;transition:background-color 0.15s;line-height:1.2}
-.btn-igc:hover,.btn-igc:active{background:#7dd3fc}
-.btn-disabled{display:inline-block;color:var(--text-muted);padding:7px 14px;font-size:0.78rem;font-style:italic;cursor:default;white-space:nowrap}
-footer{padding:14px 18px;padding-bottom:max(14px,env(safe-area-inset-bottom));border-top:1px solid var(--card-border);color:var(--text-muted);font-size:0.72rem;text-align:center}
-footer a{color:var(--accent);text-decoration:none}
-footer a:hover{text-decoration:underline}
-@media (max-width: 720px){
-header{padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top))}
-.header-top{flex-direction:column;align-items:flex-start}
-h1{font-size:0.95rem}
-.meta{font-size:0.74rem;width:100%;margin-top:2px}
-.date-nav{width:100%;margin-top:10px;gap:6px}
-.navbtn{width:46px;height:46px;padding:0;font-size:1.3rem}
-.refresh-btn{width:36px;height:36px;font-size:1.15rem}
-.date-display{min-width:0;font-size:0.85rem;padding:0 8px}
-.search-input{font-size:16px;padding:11px 40px 11px 36px}
-.search-clear{padding:8px 10px;font-size:1.25rem}
-main{padding:12px 12px 20px}
-thead{display:none}
-table,tbody,tr,td{display:block;width:100%}
-tr{background:var(--bg-card);border:1px solid var(--card-border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
-tr:hover{background:var(--bg-card)}
-td{border:none!important;padding:3px 0!important;text-align:left!important;font-size:0.92rem}
-td:not(.cell-reg):not(.cell-action)::before{content:attr(data-label);display:inline-block;min-width:96px;color:var(--text-muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:600}
-td.cell-reg{font-size:1.05rem;padding-bottom:8px!important;border-bottom:1px solid var(--card-border)!important;margin-bottom:6px}
-td.cell-ac{padding-bottom:8px!important;font-size:0.88rem}
-td.cell-action{margin-top:12px;padding:0!important}
-td.cell-action .btn-igc{display:block;text-align:center;padding:13px 16px;font-size:1rem;border-radius:6px;min-height:46px}
-td.cell-action .btn-disabled{display:block;text-align:center;padding:13px 16px;font-size:0.85rem}
-.num,.num-muted{text-align:left}
-tfoot{display:block;width:100%}
-tfoot tr.sum-row{background:var(--accent-dim);border-color:var(--accent)}
-tfoot tr.sum-row td{padding:0!important}
-tfoot tr.sum-row td::before{display:none!important}
-}
-</style>
-</head><body>
-<header>
-<div class="header-top">
-<div class="title-wrap">
-<h1><a class="title-link" id="title-link" href="https://flightbook.glidernet.org/logbook/${icao}" target="_blank" rel="noopener" title="OGN Flightbook (${icao}) öffnen">🧭 OGN Fluganalyse <span class="accent">${icao}</span></a></h1>
-<button class="refresh-btn" id="refresh-btn" type="button" title="Aktualisieren" aria-label="Aktualisieren">⟳</button>
-</div>
-<div class="meta" id="meta">lädt…</div>
-</div>
-<div class="date-nav">
-<button class="navbtn" id="prev-day" type="button" title="Vorheriger Tag" aria-label="Vorheriger Tag">‹</button>
-<button class="date-display" id="date-display" type="button" title="Zurück zu heute">heute</button>
-<button class="navbtn" id="next-day" type="button" title="Nächster Tag" aria-label="Nächster Tag">›</button>
-</div>
-<div class="search-bar">
-<span class="search-icon" aria-hidden="true">🔍</span>
-<input class="search-input" id="filter-input" type="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Filter (/): Kennzeichen, Wettbewerbskennung oder Typ – z. B. KBC, IA, ASK">
-<button class="search-clear" id="filter-clear" type="button" title="Filter löschen (Esc)" aria-label="Filter löschen">×</button>
-</div>
-</header>
-<main>
-<div id="content" class="status">Lade Flugdaten…</div>
-<div class="hint">📊 SeeYou Analyse öffnet den Flug im SeeYou Cloud Viewer (2D/3D-Karte, Barogramm, Statistiken). OGN hält IGC-Dateien max. 24 h vor.</div>
-</main>
-<footer>Datenquelle: <a id="footer-link" href="https://flightbook.glidernet.org/logbook/${icao}" target="_blank" rel="noopener">OGN Flightbook (${icao})</a> · Viewer: <a href="https://seeyou.cloud" target="_blank" rel="noopener">SeeYou Cloud</a></footer>
-<script>
-(function(){
-var ICAO=${icaoJs};
-var API_BASE="https://flightbook.glidernet.org/api/logbook/"+ICAO+"/";
-var content=document.getElementById("content");
-var meta=document.getElementById("meta");
-var prevBtn=document.getElementById("prev-day");
-var nextBtn=document.getElementById("next-day");
-var dateDisplay=document.getElementById("date-display");
-var refreshBtn=document.getElementById("refresh-btn");
-var titleLink=document.getElementById("title-link");
-var footerLink=document.getElementById("footer-link");
-var filterInput=document.getElementById("filter-input");
-var clearBtn=document.getElementById("filter-clear");
-var today=new Date();today.setHours(0,0,0,0);
-var currentDate=new Date(today);
-var lastData=null;
-var STORAGE_KEY="ogn-filter-"+ICAO;
-function loadFilter(){try{return(localStorage.getItem(STORAGE_KEY)||"").trim()}catch(e){return ""}}
-function saveFilter(v){try{if(v)localStorage.setItem(STORAGE_KEY,v);else localStorage.removeItem(STORAGE_KEY)}catch(e){}}
-var filterText=loadFilter();
-var DAYS=["So","Mo","Di","Mi","Do","Fr","Sa"];
-function pad(n){return n<10?"0"+n:""+n}
-function fmtISO(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
-function fmtHuman(d){return DAYS[d.getDay()]+". "+pad(d.getDate())+"."+pad(d.getMonth()+1)+"."+d.getFullYear()}
-function isFuture(d){return d.getTime()>today.getTime()}
-function isToday(d){return d.getTime()===today.getTime()}
-function isYesterday(d){var y=new Date(today);y.setDate(y.getDate()-1);return d.getTime()===y.getTime()}
-function formatDuration(s){if(!s)return"–";var h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h?h+":"+pad(m)+" h":m+" min"}
-function formatStart(s){return s?s.replace("h",":"):"?"}
-function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]})}
-function buildIgcUrl(date,dev,f){var a=dev.address,s=f.start_tsp-(f.start_delta!==undefined?60*f.start_delta:30),o=f.stop_tsp+(f.stop_delta!==undefined?60*f.stop_delta:30);return"https://flightbook.glidernet.org/api/live/igc/"+a+"/"+s+"/"+o+"?date="+date}
-function buildSeeYouUrl(u){return"https://seeyou.cloud/api/open?igc="+encodeURIComponent(u)}
-function hasIgc(d,f){if(!d.identified||!d.tracked)return false;if(!f.stop_tsp)return false;if(Date.now()/1000-f.stop_tsp>86400)return false;return true}
-function updateDateUI(){var label=isToday(currentDate)?"heute":isYesterday(currentDate)?"gestern":fmtHuman(currentDate);dateDisplay.textContent=label+" · "+fmtISO(currentDate);nextBtn.disabled=isToday(currentDate);var url="https://flightbook.glidernet.org/logbook/"+ICAO+"/"+fmtISO(currentDate);titleLink.href=url;footerLink.href=url}
-function matchesFilter(d){
-  if(!filterText)return true;
-  var q=filterText.toLowerCase();
-  return(((d.registration||"")+" "+(d.competition||"")+" "+(d.aircraft||"")).toLowerCase().indexOf(q)!==-1);
-}
-function regOf(d){if(!d)return"?";var a=d.address||"";var priv=a.charAt(0)==="~"||a.charAt(0)==="_";if(priv)return"#"+a.slice(-5);return d.registration||a.slice(-5)||"?"}
-function buildTowPairs(list){
-  for(var i=0;i<list.length;i++){if(list[i])list[i]._partner=null}
-  for(var i=0;i<list.length;i++){
-    var f=list[i];if(!f||!f.towing||!f.start_tsp||f._partner)continue;
-    var best=null,bestDelta=Infinity;
-    for(var j=0;j<list.length;j++){
-      if(j===i)continue;var g=list[j];if(!g||!g.start_tsp)continue;
-      if(g.device===f.device)continue;if(g._partner)continue;
-      var delta=Math.abs(g.start_tsp-f.start_tsp);
-      if(delta<=20&&delta<bestDelta){bestDelta=delta;best=g}
-    }
-    if(best){f._partner=best;best._partner=f}
-  }
-}
-function render(){
-  if(!lastData)return;
-  var data=lastData,devs=data.devices||[],allFlights=(data.flights||[]).slice();
-  var af=data.airfield||{},now=new Date();
-  buildTowPairs(allFlights);
-  var flights=filterText?allFlights.filter(function(f){return matchesFilter(devs[f.device]||{})}):allFlights;
-  var total=allFlights.length,shown=flights.length;
-  var countStr=filterText?'<span class="count">'+shown+'</span> von '+total+' Flügen':total+' Flug'+(total===1?'':'e');
-  meta.innerHTML="<b>"+esc(af.name||ICAO)+"</b>"+(af.elevation?" · "+af.elevation+" m":"")+" · "+countStr+(isToday(currentDate)?" · aktualisiert "+pad(now.getHours())+":"+pad(now.getMinutes()):"");
-  if(!allFlights.length){content.className="status";content.textContent="Keine Flüge an diesem Tag.";return}
-  if(!flights.length){content.className="status";content.textContent='Keine Flüge passen zum Filter „'+filterText+'".';return}
-  flights.sort(function(a,b){return b.start_tsp-a.start_tsp});
-  var html='<table><thead><tr><th>Kennzeichen</th><th>Flugzeug</th><th>Start</th><th>Stop</th><th class="num">Dauer</th><th class="num">max. AGL</th><th class="num">max. MSL</th><th></th></tr></thead><tbody>';
-  flights.forEach(function(f){
-    var d=devs[f.device]||{},a=d.address||"";
-    var priv=a.charAt(0)==="~"||a.charAt(0)==="_";
-    var reg=priv?'<span class="priv">#'+esc(a.slice(-5))+"</span>":esc(d.registration||a.slice(-5))+(d.competition?' <span class="comp">"'+esc(d.competition)+'"</span>':"");
-    var ac=esc(d.aircraft||"—");
-    var sc=f.start_code?' <span class="cell-ac">('+esc(f.start_code)+")</span>":"";
-    var stc=f.stop_code?' <span class="cell-ac">('+esc(f.stop_code)+")</span>":"";
-    var tow="";
-    if(f._partner){var pd=devs[f._partner.device]||{};tow=' <span class="tow-partner" title="Schlepppartner">🪢 '+esc(regOf(pd))+'</span>'}
-    else if(f.towing){tow=' <span class="cell-ac" title="Schleppfahrt">🪢</span>'}
-    var warn=f.warn?' <span class="warn-icon" title="Detektion unsicher">⚠</span>':"";
-    var stop=f.stop?(esc(formatStart(f.stop))+stc):'<span class="running">läuft…</span>';
-    var dur=f.duration?esc(formatDuration(f.duration)):'<span class="running">'+(f.duration_expected?"≈ "+formatDuration(f.duration_expected):"läuft…")+"</span>";
-    var agl=f.max_height?f.max_height+" m":"–";
-    var msl=f.max_alt?f.max_alt+" m":"–";
-    var action;
-    if(hasIgc(d,f)){
-      var url=buildSeeYouUrl(buildIgcUrl(data.date,d,f));
-      action='<a class="btn-igc" href="'+url+'" target="_blank" rel="noopener" title="Flugweg im SeeYou Cloud Viewer öffnen">📊 SeeYou Analyse</a>';
-    }else{
-      var why=priv?"anonym":!d.identified?"nicht registriert":!f.stop_tsp?"läuft noch":"IGC abgelaufen";
-      action='<span class="btn-disabled" title="Kein IGC – '+why+'">— '+why+" —</span>";
-    }
-    html+="<tr>"+
-      '<td class="cell-reg">'+reg+"</td>"+
-      '<td class="cell-ac" data-label="Flugzeug">'+ac+"</td>"+
-      '<td data-label="Start">'+esc(formatStart(f.start))+sc+tow+"</td>"+
-      '<td data-label="Stop">'+stop+warn+"</td>"+
-      '<td class="num" data-label="Dauer">'+dur+"</td>"+
-      '<td class="num-muted" data-label="max. AGL">'+agl+"</td>"+
-      '<td class="num-muted" data-label="max. MSL">'+msl+"</td>"+
-      '<td class="cell-action">'+action+"</td>"+
-      "</tr>";
-  });
-  if(filterText){
-    var sumSec=0,running=0;
-    flights.forEach(function(f){if(f.duration)sumSec+=f.duration;else if(!f.stop_tsp)running++});
-    var sumDur=sumSec?formatDuration(sumSec):"–";
-    var runHtml=running?'<span class="sum-running">+'+running+' läuft…</span>':'';
-    html+='</tbody><tfoot><tr class="sum-row"><td colspan="8"><div class="cell-sum">'+
-      '<span class="sum-label">Σ Filter</span>'+
-      '<span class="sum-item"><span class="lbl">Starts:</span>'+shown+'</span>'+
-      '<span class="sum-item"><span class="lbl">Flugzeit:</span>'+sumDur+'</span>'+
-      runHtml+
-      '</div></td></tr></tfoot></table>';
-  }else{
-    html+="</tbody></table>";
-  }
-  content.className="";
-  content.innerHTML=html;
-}
-function load(){
-  refreshBtn.classList.add("spinning");
-  content.className="status";content.textContent="Lade Flugdaten…";meta.textContent="lädt…";
-  fetch(API_BASE+fmtISO(currentDate),{cache:"no-store"})
-    .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})
-    .then(function(d){lastData=d;render()})
-    .catch(function(e){content.className="status";content.textContent="OGN nicht erreichbar ("+e.message+").";meta.textContent=ICAO+" · Fehler beim Laden"})
-    .then(function(){refreshBtn.classList.remove("spinning")});
-}
-function setDate(d){if(isFuture(d))return;currentDate=d;updateDateUI();load()}
-prevBtn.onclick=function(){var d=new Date(currentDate);d.setDate(d.getDate()-1);setDate(d)};
-nextBtn.onclick=function(){var d=new Date(currentDate);d.setDate(d.getDate()+1);setDate(d)};
-dateDisplay.onclick=function(){setDate(new Date(today))};
-refreshBtn.onclick=function(){load()};
-function applyFilter(v){filterText=(v||"").trim();saveFilter(filterText);clearBtn.classList.toggle("visible",!!filterText);if(lastData)render()}
-filterInput.value=filterText;clearBtn.classList.toggle("visible",!!filterText);
-filterInput.addEventListener("input",function(){applyFilter(filterInput.value)});
-clearBtn.addEventListener("click",function(){filterInput.value="";applyFilter("");filterInput.focus()});
-document.addEventListener("keydown",function(e){
-  if(e.target===filterInput){if(e.key==="Escape"){filterInput.value="";applyFilter("");filterInput.blur();e.preventDefault()}return}
-  if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;
-  if(e.key==="/"){filterInput.focus();filterInput.select();e.preventDefault()}
-  else if(e.key==="ArrowLeft"){prevBtn.click();e.preventDefault()}
-  else if(e.key==="ArrowRight"&&!nextBtn.disabled){nextBtn.click();e.preventDefault()}
-});
-updateDateUI();
-load();
-})();
-<\/script>
-</body></html>`;
-    }
-
-    // Blob-URL für jeden Fluganalyse-Link erzeugen → klickt wie normaler "target=_blank"-Link
-    document.querySelectorAll('a[data-flights-icao]').forEach(function (link) {
-      var icao = link.getAttribute('data-flights-icao');
-      var blob = new Blob([buildFlightsHtml(icao)], { type: 'text/html;charset=utf-8' });
-      link.href = URL.createObjectURL(blob);
-    });
-  })();
   </script>
 
 </body>
