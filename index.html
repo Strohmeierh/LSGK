@@ -132,6 +132,33 @@
     }
     .brf-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
+    /* Ampel auf Mobile deutlich kompakter */
+    @media (max-width: 600px) {
+      #briefing-bar { padding: 4px 4px; margin-bottom: 10px; border-radius: 6px; }
+      .brf-chip { margin: 2px 5px; font-size: 0.68rem; gap: 4px; }
+      .brf-dot { width: 8px; height: 8px; }
+    }
+
+    /* Briefing-Detail-Modal */
+    .brf-modal { display: none; position: fixed; inset: 0; z-index: 1100; align-items: center; justify-content: center; padding: 16px; }
+    .brf-modal.open { display: flex; }
+    .brf-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(3px); }
+    .brf-modal-card {
+      position: relative; z-index: 1; background: var(--card-bg);
+      border: 1px solid var(--card-border); border-radius: var(--radius);
+      max-width: 520px; width: 100%; max-height: 86vh; overflow-y: auto;
+      padding: 16px 20px 18px;
+    }
+    .brf-modal-card h3 {
+      margin: 0 0 6px; font-size: 0.95rem; color: var(--accent);
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    }
+    .brf-item { padding: 10px 0; border-bottom: 1px solid var(--card-border); }
+    .brf-item:last-of-type { border-bottom: none; }
+    .brf-item-head { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.88rem; }
+    .brf-item-value { font-size: 0.82rem; color: var(--accent); margin: 3px 0 4px 18px; }
+    .brf-item-text { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+
     /* === Wetter-Panel === */
     .wx-panel {
       max-width: 1600px;
@@ -798,8 +825,8 @@
   <!-- Gewitter-Hinweisbanner (Modellindikator Open-Meteo, kein Ersatz für offizielle Warnungen) -->
   <div id="storm-banner" style="display:none;max-width:1600px;margin:0 auto 16px;padding:10px 14px;border-radius:8px;border:1px solid;font-size:0.85rem;text-align:center;line-height:1.4;"></div>
 
-  <!-- Briefing-Ampel: Kurzüberblick, Klick öffnet das Wetter-Panel -->
-  <div id="briefing-bar" title="Kurz-Briefing – Klick öffnet die Wetterdetails"></div>
+  <!-- Briefing-Ampel: Kurzüberblick, Klick öffnet die Erklärung im Detail-Fenster -->
+  <div id="briefing-bar" title="Kurz-Briefing – Klick für Werte &amp; Erklärung"></div>
 
   <!-- ===== WETTER-PANEL ===== -->
   <div class="wx-panel" id="wx-panel">
@@ -1010,6 +1037,19 @@
         </span>
       </div>
       <img class="lightbox-img" id="lightbox-img" alt="Kamera-Grossansicht">
+    </div>
+  </div>
+
+  <div class="brf-modal" id="brf-modal" role="dialog" aria-modal="true" aria-label="Briefing-Details">
+    <div class="brf-modal-backdrop"></div>
+    <div class="brf-modal-card">
+      <h3>Kurz-Briefing erklärt
+        <button class="lightbox-close" id="brf-modal-close" type="button" aria-label="Schliessen">×</button>
+      </h3>
+      <div id="brf-modal-content"></div>
+      <div style="text-align:center;margin-top:14px;">
+        <button class="top-btn" id="brf-modal-wx" type="button">Alle Wetterdetails öffnen</button>
+      </div>
     </div>
   </div>
 
@@ -1399,37 +1439,102 @@
       return '<span class="brf-chip"><span class="brf-dot" style="background:' + color + '"></span>' + label + '</span>';
     }
 
-    function renderBriefing() {
-      var bar = document.getElementById('briefing-bar');
-      if (!bar) return;
+    // Gemeinsame Datenbasis für Chips UND Detail-Modal
+    function brfData() {
       var G = '#10b981', Y = '#f59e0b', R = '#ef4444', N = '#64748b';
-      var chips = '';
+      var out = [];
       if (briefing.thermik !== undefined) {
         var th = briefing.thermik;
-        chips += (th && th.von)
-          ? brfChip(th.dauer >= 4 ? G : Y, 'Thermik ' + th.von + '–' + th.bis)
-          : brfChip(N, 'Thermik: keine');
+        out.push({
+          color: th && th.von ? (th.dauer >= 4 ? G : Y) : N,
+          chip:  th && th.von ? 'Thermik ' + th.von.slice(0, 2) + '–' + th.bis.slice(0, 2) + ' h' : 'Thermik: keine',
+          title: 'Thermikfenster',
+          value: th && th.von ? th.von + ' – ' + th.bis + ' Uhr' : 'heute keine erwartet',
+          text:  'Modellabschätzung, wann Aufwinde nutzbar sind: erwärmte Bodenluft steigt mindestens 400&nbsp;m über Grund, wenig Bewölkung, kein Regen. Grün ab 4&nbsp;Stunden Fensterlänge. Details (Arbeitshöhe, Basis, Auslösetemperatur) in der Karte «Thermik» im Wetter-Panel.'
+        });
       }
       if (briefing.capeMax !== undefined) {
-        var cc = (briefing.hasTs || briefing.capeMax >= 1000) ? R : (briefing.capeMax >= 500 ? Y : G);
-        chips += brfChip(cc, briefing.hasTs ? 'Gewitter!' : 'CAPE ' + Math.round(briefing.capeMax));
+        out.push({
+          color: (briefing.hasTs || briefing.capeMax >= 1000) ? R : (briefing.capeMax >= 500 ? Y : G),
+          chip:  briefing.hasTs ? 'Gewitter!' : 'CAPE ' + Math.round(briefing.capeMax),
+          title: 'CAPE – Gewitterpotenzial',
+          value: Math.round(briefing.capeMax) + ' J/kg (Maximum der nächsten 12 h)' + (briefing.hasTs ? ' · Gewitter in der Vorhersage!' : ''),
+          text:  'CAPE (Convective Available Potential Energy) ist die Energie, die aufsteigender Luft zur Verfügung steht – gemessen in Joule pro Kilogramm. Hohe Werte = labile Luftmasse: kräftige Thermik, aber auch Risiko von Überentwicklung und Gewittern. Faustregel: unter 500 ruhig · 500–1000 lebhaft, Schauer möglich · über 1000 Gewitterpotenzial – Wetterentwicklung im Auge behalten.'
+        });
       }
       if (briefing.foehnDp !== undefined && briefing.foehnDp !== null) {
-        var a = Math.abs(briefing.foehnDp);
-        chips += brfChip(a < 2 ? G : (a < 4 ? Y : R),
-          'Föhn ' + (briefing.foehnDp > 0 ? '+' : '') + briefing.foehnDp.toFixed(1).replace('.', ',') + ' hPa');
+        var a  = Math.abs(briefing.foehnDp);
+        var dv = (briefing.foehnDp > 0 ? '+' : '') + briefing.foehnDp.toFixed(1).replace('.', ',');
+        out.push({
+          color: a < 2 ? G : (a < 4 ? Y : R),
+          chip:  'Föhn ' + dv + ' hPa',
+          title: 'Föhn-Index',
+          value: dv + ' hPa (QNH Sion − Boltigen)',
+          text:  'Druckdifferenz Süd−Nord über die Berner Alpen. Eine grosse Differenz treibt Föhn- bzw. Nordströmung: Turbulenz, Leewellen und kräftiger Höhenwind im Saanenland. Bis ±2&nbsp;hPa unauffällig, ab ±4&nbsp;hPa Föhnlage wahrscheinlich. Positives Vorzeichen = Südföhn, negatives = Nord-/Bisenlage.'
+        });
       }
       if (briefing.gustKt !== undefined && briefing.gustKt !== null) {
         var g = Math.round(briefing.gustKt);
-        chips += brfChip(g < 15 ? G : (g < 25 ? Y : R), 'Böen ' + g + ' kt');
+        out.push({
+          color: g < 15 ? G : (g < 25 ? Y : R),
+          chip:  'Böen ' + g + ' kt',
+          title: 'Talwind / Böen',
+          value: g + ' kt Böenspitze (Château-d\'Oex)',
+          text:  'Aktuelle Böenspitze der Talstation – Anhaltspunkt für den Wind am Platz. Ab 15&nbsp;kt wird es für Start und Landung anspruchsvoller (gelb), ab 25&nbsp;kt kritisch (rot). Höhenwind: siehe Bergwind-Karten und Trend im Wetter-Panel.'
+        });
       }
       if (briefing.rainNow > 0) {
-        chips += brfChip(R, 'Regen jetzt');
+        out.push({
+          color: R, chip: 'Regen jetzt', title: 'Niederschlag',
+          value: 'es regnet aktuell an der Station',
+          text:  'Aktuelle Regenrate der Wetterstation Château-d\'Oex. Für die Entwicklung: Radar-Panel und Regen-Zeile im 12-h-Trend.'
+        });
       } else if (briefing.rainProb !== undefined) {
-        chips += brfChip(briefing.rainProb > 60 ? R : (briefing.rainProb >= 30 ? Y : G),
-          'Regen ' + Math.round(briefing.rainProb) + ' %');
+        out.push({
+          color: briefing.rainProb > 60 ? R : (briefing.rainProb >= 30 ? Y : G),
+          chip:  'Regen ' + Math.round(briefing.rainProb) + ' %',
+          title: 'Regenwahrscheinlichkeit',
+          value: Math.round(briefing.rainProb) + ' % (Maximum der nächsten 12 h)',
+          text:  'Höchste Regenwahrscheinlichkeit der nächsten 12&nbsp;Stunden laut Open-Meteo. Ab 30&nbsp;% gelb, über 60&nbsp;% rot. Zeitliche Verteilung: Regen-Zeile im 12-h-Trend, Zugbahnen im Radar.'
+        });
       }
-      if (chips) { bar.innerHTML = chips; bar.style.display = 'block'; }
+      return out;
+    }
+
+    function renderBriefing() {
+      var bar = document.getElementById('briefing-bar');
+      if (!bar) return;
+      var data = brfData();
+      if (!data.length) return;
+      var chips = '';
+      data.forEach(function (d) { chips += brfChip(d.color, d.chip); });
+      bar.innerHTML = chips;
+      bar.style.display = 'block';
+    }
+
+    /* ── Briefing-Detail-Modal (Klick auf die Ampel) ── */
+    function openBrfModal() {
+      var m = document.getElementById('brf-modal');
+      var c = document.getElementById('brf-modal-content');
+      if (!m || !c) return;
+      var html = '';
+      brfData().forEach(function (d) {
+        html += '<div class="brf-item">' +
+          '<div class="brf-item-head"><span class="brf-dot" style="background:' + d.color + '"></span>' +
+          d.title + '</div>' +
+          '<div class="brf-item-value">' + d.value + '</div>' +
+          '<div class="brf-item-text">' + d.text + '</div></div>';
+      });
+      c.innerHTML = html ||
+        '<div class="brf-item-text" style="padding:10px 0;">Noch keine Daten geladen – einen Moment…</div>';
+      m.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeBrfModal() {
+      var m = document.getElementById('brf-modal');
+      if (!m) return;
+      m.classList.remove('open');
+      document.body.style.overflow = '';
     }
 
     var CHD_URL  = 'https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/chd/ogd-smn_chd_t_now.csv';
@@ -2817,11 +2922,25 @@
     if (storeGet('lsgk-wx-open') === '1') toggleWx();
     if (storeGet('lsgk-radar-open') === '1') toggleRadar();
 
-    // Klick auf die Briefing-Ampel öffnet die Wetterdetails
+    // Klick auf die Briefing-Ampel öffnet das Erklär-Fenster
     var brfBar = document.getElementById('briefing-bar');
-    if (brfBar) brfBar.addEventListener('click', function () {
-      if (!document.getElementById('wx-panel').classList.contains('open')) toggleWx();
-    });
+    if (brfBar) brfBar.addEventListener('click', openBrfModal);
+
+    (function () {
+      var m = document.getElementById('brf-modal');
+      if (!m) return;
+      m.querySelector('.brf-modal-backdrop').addEventListener('click', closeBrfModal);
+      document.getElementById('brf-modal-close').addEventListener('click', closeBrfModal);
+      document.getElementById('brf-modal-wx').addEventListener('click', function () {
+        closeBrfModal();
+        var p = document.getElementById('wx-panel');
+        if (!p.classList.contains('open')) toggleWx();
+        p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && m.classList.contains('open')) closeBrfModal();
+      });
+    })();
 
     // Briefing-Ampel, Gewitter-Banner und Thermik auch ohne offenes Panel laden
     loadOpenMeteo();
