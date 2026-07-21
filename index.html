@@ -1467,8 +1467,8 @@
         var dv = (briefing.foehnDp > 0 ? '+' : '') + briefing.foehnDp.toFixed(1).replace('.', ',');
         out.push({
           color: a < 2 ? G : (a < 4 ? Y : R),
-          chip:  'Föhn ' + dv + ' hPa',
-          title: 'Föhn-Index',
+          chip:  (briefing.foehnDp < 0 ? 'Bise ' : 'Föhn ') + dv + ' hPa',
+          title: 'Föhn-/Bise-Index',
           value: dv + ' hPa (QNH Sion − Boltigen)',
           text:  'Druckdifferenz Süd−Nord über die Berner Alpen. Eine grosse Differenz treibt Föhn- bzw. Nordströmung: Turbulenz, Leewellen und kräftiger Höhenwind im Saanenland. Bis ±2&nbsp;hPa unauffällig, ab ±4&nbsp;hPa Föhnlage wahrscheinlich. Positives Vorzeichen = Südföhn, negatives = Nord-/Bisenlage.'
         });
@@ -1777,7 +1777,7 @@
         else if (adp < 4) { fCol = '#f59e0b'; fTxt = dp > 0 ? 'Südföhn-Tendenz' : 'Nord-/Bise-Tendenz'; }
         else              { fCol = '#ef4444'; fTxt = dp > 0 ? 'Südföhn wahrscheinlich' : 'Nordstau / kräftige Bise'; }
         var sign = dp > 0 ? '+' : '';
-        foehnHtml = '<div class="wx-stat"><div class="wx-stat-label">Föhn-Index</div>' +
+        foehnHtml = '<div class="wx-stat"><div class="wx-stat-label">' + (dp < 0 ? 'Bise-Index' : 'Föhn-Index') + '</div>' +
           '<div class="wx-stat-value" style="color:' + fCol + ';white-space:nowrap;">' + sign + dp.toFixed(1).replace('.', ',') + '&nbsp;hPa</div>' +
           '<div class="wx-stat-sub" style="white-space:nowrap;">Sion − Boltigen<br>' + fTxt + '</div></div>';
       }
