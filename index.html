@@ -1429,7 +1429,7 @@
         chips += brfChip(briefing.rainProb > 60 ? R : (briefing.rainProb >= 30 ? Y : G),
           'Regen ' + Math.round(briefing.rainProb) + ' %');
       }
-      if (chips) { bar.innerHTML = chips; bar.style.display = ''; }
+      if (chips) { bar.innerHTML = chips; bar.style.display = 'block'; }
     }
 
     var CHD_URL  = 'https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/chd/ogd-smn_chd_t_now.csv';
