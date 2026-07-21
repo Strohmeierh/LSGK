@@ -119,6 +119,19 @@
       letter-spacing: 0.03em;
     }
 
+    /* === Briefing-Ampel === */
+    #briefing-bar {
+      display: none; max-width: 1600px; margin: 0 auto 16px;
+      padding: 8px 12px; background: var(--card-bg);
+      border: 1px solid var(--card-border); border-radius: 8px;
+      text-align: center; cursor: pointer;
+    }
+    .brf-chip {
+      display: inline-flex; align-items: center; gap: 6px; margin: 3px 9px;
+      font-size: 0.8rem; color: var(--text); white-space: nowrap;
+    }
+    .brf-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
     /* === Wetter-Panel === */
     .wx-panel {
       max-width: 1600px;
@@ -785,6 +798,9 @@
   <!-- Gewitter-Hinweisbanner (Modellindikator Open-Meteo, kein Ersatz für offizielle Warnungen) -->
   <div id="storm-banner" style="display:none;max-width:1600px;margin:0 auto 16px;padding:10px 14px;border-radius:8px;border:1px solid;font-size:0.85rem;text-align:center;line-height:1.4;"></div>
 
+  <!-- Briefing-Ampel: Kurzüberblick, Klick öffnet das Wetter-Panel -->
+  <div id="briefing-bar" title="Kurz-Briefing – Klick öffnet die Wetterdetails"></div>
+
   <!-- ===== WETTER-PANEL ===== -->
   <div class="wx-panel" id="wx-panel">
     <div class="wx-card">
@@ -807,6 +823,16 @@
         Trend nächste 12 h – Open-Meteo
       </div>
       <div id="om-content"></div>
+    </div>
+
+    <div class="wx-card" id="thermik-card" style="display:none;">
+      <div class="wx-card-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+        Thermik – Modellabschätzung
+      </div>
+      <div id="thermik-content"></div>
     </div>
   </div>
 
@@ -1347,15 +1373,16 @@
       btn.setAttribute('aria-expanded', open);
       storeSet('lsgk-wx-open', open ? '1' : null);
       if (open && !wxLoaded) { wxLoaded = true; loadWetter(); }
-      if (open) loadOpenMeteo();
+      if (open) { loadOpenMeteo(); loadThermik(); }
     };
 
+    // Briefing-Ampel + Banner brauchen frische Daten auch bei geschlossenem
+    // Panel (Open-Meteo/Thermik mit internem 15-min-Throttle).
     setInterval(function() {
       if(document.hidden) return;
-      loadOpenMeteo(); // hält auch das Gewitter-Banner aktuell (15-min-Throttle intern)
-      if(document.getElementById('wx-panel').classList.contains('open')) {
-        loadWetter();
-      }
+      loadOpenMeteo();
+      loadThermik();
+      loadWetter();
     }, 600000);
 
     /* ── Wetterdaten laden: MeteoSchweiz Station Château-d'Oex (CHD) ──
@@ -1363,6 +1390,48 @@
        praktisch gleicher Höhe (1028 m vs. 1008 m), gleiches Talklima.
        Open Data (CORS offen) – direkt im Browser, ohne Server/Job.
        Doku: https://opendatadocs.meteoswiss.ch                        */
+    /* ── Briefing-Ampel: verdichtet Kernwerte zu farbigen Chips ────
+       Wird von renderAll (Föhn/Böen/Regen), renderOpenMeteo (CAPE/
+       Regenwahrscheinlichkeit) und renderThermik (Fenster) gefüttert. */
+    var briefing = {};
+
+    function brfChip(color, label) {
+      return '<span class="brf-chip"><span class="brf-dot" style="background:' + color + '"></span>' + label + '</span>';
+    }
+
+    function renderBriefing() {
+      var bar = document.getElementById('briefing-bar');
+      if (!bar) return;
+      var G = '#10b981', Y = '#f59e0b', R = '#ef4444', N = '#64748b';
+      var chips = '';
+      if (briefing.thermik !== undefined) {
+        var th = briefing.thermik;
+        chips += (th && th.von)
+          ? brfChip(th.dauer >= 4 ? G : Y, 'Thermik ' + th.von + '–' + th.bis)
+          : brfChip(N, 'Thermik: keine');
+      }
+      if (briefing.capeMax !== undefined) {
+        var cc = (briefing.hasTs || briefing.capeMax >= 1000) ? R : (briefing.capeMax >= 500 ? Y : G);
+        chips += brfChip(cc, briefing.hasTs ? 'Gewitter!' : 'CAPE ' + Math.round(briefing.capeMax));
+      }
+      if (briefing.foehnDp !== undefined && briefing.foehnDp !== null) {
+        var a = Math.abs(briefing.foehnDp);
+        chips += brfChip(a < 2 ? G : (a < 4 ? Y : R),
+          'Föhn ' + (briefing.foehnDp > 0 ? '+' : '') + briefing.foehnDp.toFixed(1).replace('.', ',') + ' hPa');
+      }
+      if (briefing.gustKt !== undefined && briefing.gustKt !== null) {
+        var g = Math.round(briefing.gustKt);
+        chips += brfChip(g < 15 ? G : (g < 25 ? Y : R), 'Böen ' + g + ' kt');
+      }
+      if (briefing.rainNow > 0) {
+        chips += brfChip(R, 'Regen jetzt');
+      } else if (briefing.rainProb !== undefined) {
+        chips += brfChip(briefing.rainProb > 60 ? R : (briefing.rainProb >= 30 ? Y : G),
+          'Regen ' + Math.round(briefing.rainProb) + ' %');
+      }
+      if (chips) { bar.innerHTML = chips; bar.style.display = ''; }
+    }
+
     var CHD_URL  = 'https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/chd/ogd-smn_chd_t_now.csv';
 
     // Bergwind rund ums Saanenland via winds.mobi (aggregiert Gleitschirm- &
@@ -1691,6 +1760,12 @@
         'Föhn-Index = QNH-Differenz Sion−Boltigen. Alle Angaben zur groben Orientierung.' +
         '</div>';
 
+      // Briefing-Ampel füttern
+      briefing.gustKt  = wgstKt;
+      briefing.rainNow = rainRate;
+      briefing.foehnDp = (foehn && foehn.sio !== null && foehn.bol !== null) ? (foehn.sio - foehn.bol) : null;
+      renderBriefing();
+
       // ─── Finale Ausgabe ───
       el.innerHTML =
         stationHeader +
@@ -1956,16 +2031,22 @@
       // nicht CORS-offen abrufbar; Banner verlinkt auf MeteoSchweiz.
       var banner = document.getElementById('storm-banner');
       if (banner) {
-        var maxCape = 0, firstTrig = null, hasTs = false;
+        var maxCape = 0, firstTrig = null, hasTs = false, probMax = 0;
         for (var j = 0; j < h.time.length; j++) {
           var cj = h.cape ? h.cape[j] : null;
           var wc = h.weather_code ? h.weather_code[j] : null;
+          var pj = h.precipitation_probability ? h.precipitation_probability[j] : null;
           if (cj !== null && cj > maxCape) maxCape = cj;
           if (wc !== null && wc >= 95) hasTs = true;
+          if (pj !== null && pj > probMax) probMax = pj;
           if (firstTrig === null && ((cj !== null && cj >= 800) || (wc !== null && wc >= 95))) {
             firstTrig = h.time[j].slice(11, 16);
           }
         }
+        briefing.capeMax  = maxCape;
+        briefing.hasTs    = hasTs;
+        briefing.rainProb = probMax;
+        renderBriefing();
         if (hasTs || maxCape >= 800) {
           var rot = hasTs || maxCape >= 1500;
           banner.style.background  = rot ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.12)';
@@ -2035,6 +2116,145 @@
         '</div>' +
         '<div class="wx-updated">Vorhersage: <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">Open-Meteo</a> · Höhenwinde: 850/700&nbsp;hPa</div>';
       card.style.display = '';
+    }
+
+    /* ── Thermik-Modellabschätzung (Open-Meteo Höhenprofil) ────
+       Parcel-Methode mit +1,5 K Überhitzung gegen das Profil
+       Boden→850→700→500 hPa. Grobe Näherung, ersetzt kein Emagramm. */
+    var TH_URL = 'https://api.open-meteo.com/v1/forecast' +
+      '?latitude=46.4875&longitude=7.25083' +
+      '&hourly=temperature_2m,dew_point_2m,cloud_cover,precipitation' +
+      ',temperature_850hPa,temperature_700hPa,temperature_500hPa' +
+      ',geopotential_height_850hPa,geopotential_height_700hPa,geopotential_height_500hPa' +
+      '&forecast_days=1&timezone=Europe%2FZurich';
+    var thLastLoad = 0;
+
+    function loadThermik() {
+      if (Date.now() - thLastLoad < 900000) return; // max. alle 15 min
+      fetch(TH_URL, { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (d) { thLastLoad = Date.now(); renderThermik(d); })
+        .catch(function () {
+          var c = document.getElementById('thermik-card');
+          if (c) c.style.display = 'none';
+        });
+    }
+
+    function renderThermik(d) {
+      var card = document.getElementById('thermik-card');
+      var el   = document.getElementById('thermik-content');
+      if (!card || !el || !d || !d.hourly || !d.hourly.time) return;
+      var h    = d.hourly;
+      var elev = d.elevation || 1008;
+      var EXC  = 1.5;      // angenommene Überhitzung des Aufwindpakets [K]
+      var DALR = 0.0098;   // trockenadiabatischer Gradient [K/m]
+
+      // lineare Interpolation der Umgebungstemperatur im Profil
+      function envT(pts, ht) {
+        for (var k = 0; k < pts.length - 1; k++) {
+          var a = pts[k], b = pts[k + 1];
+          if (a[0] == null || b[0] == null || a[1] == null || b[1] == null) continue;
+          if (ht >= a[0] && ht <= b[0]) {
+            return a[1] + (b[1] - a[1]) * (ht - a[0]) / (b[0] - a[0]);
+          }
+        }
+        return null;
+      }
+
+      var hours = [];
+      for (var i = 0; i < h.time.length; i++) {
+        var T0 = h.temperature_2m ? h.temperature_2m[i] : null;
+        var D0 = h.dew_point_2m   ? h.dew_point_2m[i]   : null;
+        var pts = [
+          [elev, T0],
+          [h.geopotential_height_850hPa ? h.geopotential_height_850hPa[i] : null, h.temperature_850hPa ? h.temperature_850hPa[i] : null],
+          [h.geopotential_height_700hPa ? h.geopotential_height_700hPa[i] : null, h.temperature_700hPa ? h.temperature_700hPa[i] : null],
+          [h.geopotential_height_500hPa ? h.geopotential_height_500hPa[i] : null, h.temperature_500hPa ? h.temperature_500hPa[i] : null]
+        ];
+        if (T0 == null || pts[1][0] == null || pts[1][1] == null) continue;
+
+        // Thermik-Obergrenze: Paket steigt trockenadiabatisch, bis es kälter ist als die Umgebung
+        var top = elev;
+        for (var k = 0; k < pts.length - 1; k++) {
+          var h1 = pts[k][0], t1 = pts[k][1], h2 = pts[k + 1][0], t2 = pts[k + 1][1];
+          if (h2 == null || t2 == null) break;
+          var p1 = (T0 + EXC - DALR * (h1 - elev)) - t1;
+          var p2 = (T0 + EXC - DALR * (h2 - elev)) - t2;
+          if (p2 > 0) { top = h2; continue; }
+          if (p1 <= 0) break;
+          top = h1 + (h2 - h1) * (p1 / (p1 - p2));
+          break;
+        }
+
+        var lcl = elev + 122 * Math.max(0, T0 - (D0 != null ? D0 : T0));
+        hours.push({
+          zeit: h.time[i].slice(11, 16),
+          hh:   parseInt(h.time[i].slice(11, 13), 10),
+          T0: T0, top: top, lcl: lcl, pts: pts,
+          cc: h.cloud_cover   ? h.cloud_cover[i]   : null,
+          pr: h.precipitation ? h.precipitation[i] : 0
+        });
+      }
+      if (!hours.length) { card.style.display = 'none'; return; }
+
+      // nutzbar: Tagstunden, Top ≥ 400 m über Grund, nicht dicht bewölkt, kein Regen
+      var nutzbar = hours.filter(function (x) {
+        return x.hh >= 8 && x.hh <= 20 && (x.top - elev) >= 400 &&
+               (x.cc === null || x.cc < 85) && (x.pr || 0) < 0.5;
+      });
+
+      var von = null, bis = null, best = null;
+      if (nutzbar.length) {
+        von = nutzbar[0].zeit;
+        bis = nutzbar[nutzbar.length - 1].zeit;
+        best = nutzbar[0];
+        nutzbar.forEach(function (x) {
+          if (Math.min(x.top, x.lcl) > Math.min(best.top, best.lcl)) best = x;
+        });
+      }
+
+      // Auslösetemperatur, um 2500 m MSL zu erreichen (Profil vom Mittag)
+      var noon = hours[Math.min(12, hours.length - 1)];
+      var trigger = null, triggerAb = null;
+      var e25 = envT(noon.pts, 2500);
+      if (e25 !== null) {
+        trigger = e25 + DALR * (2500 - elev) - EXC;
+        for (var q = 0; q < hours.length; q++) {
+          if (hours[q].T0 >= trigger) { triggerAb = hours[q].zeit; break; }
+        }
+      }
+
+      function fmt100(m) { return Math.round(m / 100) * 100; }
+      function tstat(label, val, sub) {
+        return '<div class="wx-stat"><div class="wx-stat-label">' + label + '</div>' +
+          '<div class="wx-stat-value" style="white-space:nowrap;">' + val + '</div>' +
+          (sub ? '<div class="wx-stat-sub">' + sub + '</div>' : '') + '</div>';
+      }
+
+      var html = '<div class="wx-stats" style="margin-bottom:0;">';
+      html += tstat('Thermikfenster', von ? von + '–' + bis : 'keine',
+        von ? null : 'Modell sieht heute keine nutzbare Thermik');
+      if (best) {
+        var blau = best.top < best.lcl;
+        html += tstat('Max. Arbeitshöhe', '~' + fmt100(Math.min(best.top, best.lcl)) + '&nbsp;m',
+          'MSL · um ' + best.zeit);
+        html += tstat('Charakter', blau ? 'Blauthermik' : 'Cumulus',
+          blau ? 'Basis läge über Thermik-Top' : 'Cu-Basis ~' + fmt100(best.lcl) + '&nbsp;m MSL');
+      }
+      if (trigger !== null) {
+        html += tstat('Auslösetemp. (2500&nbsp;m)', trigger.toFixed(1).replace('.', ',') + '&nbsp;°C',
+          triggerAb ? 'erreicht ab ca. ' + triggerAb : 'heute voraussichtlich nicht erreicht');
+      }
+      html += '</div>' +
+        '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;line-height:1.4;">' +
+        'Parcel-Abschätzung aus dem Open-Meteo-Höhenprofil (Boden/850/700/500&nbsp;hPa, +1,5&nbsp;K Überhitzung). ' +
+        'Grobe Näherung – für die Flugvorbereitung Emagramm/SoaringMeteo beiziehen.</div>';
+
+      el.innerHTML = html;
+      card.style.display = '';
+
+      briefing.thermik = von ? { von: von, bis: bis, dauer: nutzbar.length } : null;
+      renderBriefing();
     }
 
     /* ── Wetterradar LSGK ───────────────────────────────────── */
@@ -2597,8 +2817,16 @@
     if (storeGet('lsgk-wx-open') === '1') toggleWx();
     if (storeGet('lsgk-radar-open') === '1') toggleRadar();
 
-    // Gewitter-Banner braucht die Open-Meteo-Daten auch bei geschlossenem Panel
+    // Klick auf die Briefing-Ampel öffnet die Wetterdetails
+    var brfBar = document.getElementById('briefing-bar');
+    if (brfBar) brfBar.addEventListener('click', function () {
+      if (!document.getElementById('wx-panel').classList.contains('open')) toggleWx();
+    });
+
+    // Briefing-Ampel, Gewitter-Banner und Thermik auch ohne offenes Panel laden
     loadOpenMeteo();
+    loadThermik();
+    if (!wxLoaded) { wxLoaded = true; loadWetter(); }
 
   })();
 
